@@ -92,34 +92,45 @@
 
         /* --- 左侧内容 (图片/视频) --- */
         .viewer-left {
-            position: absolute;
+            /* 默认状态：绝对定位在左上角 */
+            position: absolute; 
             top: 0;
             left: 0;
             width: auto;
-            max-width: 50vw; /* 初始最大宽度 */
+            max-width: 50vw; 
             padding: 20px;
             transition: all 0.5s ease;
+        }
+
+        /* 展开状态 (More...)：左侧布局调整 - 实现垂直居中对齐 */
+        #project-viewer.expanded .viewer-left {
+            position: static; /* 切换到流式布局，使 Flexbox 生效 */
+            width: 50%;
+            max-width: 50%;
+            height: 100%; /* 限制总长度不超过当前页面 */
+            overflow-y: hidden; 
             
-            #project-viewer.expanded & {
-                width: 50%;
-                max-width: 50%;
-                height: 100%;
-                overflow-y: hidden;
-            }
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 垂直居中 (居中向上对齐) */
+            align-items: center; /* 水平居中 */
         }
         
         .media-wrapper {
             background: #fff;
-            width: 600px;
+            width: 600px; /* 默认最大宽度 */
             max-width: 100%;
             height: auto;
         }
-
-        .media-wrapper img {
+        
+        /* --- 统一左侧图片和视频的样式 --- */
+        .media-wrapper img,
+        .media-wrapper video {
             width: 100%;
             height: auto;
             display: block;
         }
+        /* ---------------------------------- */
 
         .meta-bar {
             margin-top: 8px;
@@ -144,12 +155,12 @@
             top: 0;
             right: 0;
             width: 50%; /* 占据右半边 */
-            height: 100%;
+            height: 100%; /* 确保高度不超过当前页面 */
             background: #fff;
-            padding: 20px;
+            padding: 30px; 
             transform: translateX(100%);
             transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            overflow-y: auto;
+            overflow-y: auto; /* 文本内容溢出时内部滚动 */
             border-left: 1px solid #eee;
         }
 
@@ -161,62 +172,70 @@
         /* 关闭按钮定位 */
         .close-button-right {
             text-align: right;
-            font-size: 12px;
+            font-size: 14px; 
             font-weight: bold;
             cursor: pointer;
             margin-bottom: 20px;
         }
 
-        /* --- 右侧详情页排版 (匹配截图) --- */
+        /* --- 右侧详情页排版 (50%/50% 布局) --- */
         
         /* 顶部区域容器: 左右并排 (标题块 + 正文块) */
         .detail-top-section {
             display: flex;
             justify-content: space-between;
             margin-bottom: 40px; 
-            gap: 20px;
+            gap: 50px; 
         }
 
-        /* 1. 左侧标题块 (Text Block 1) */
+        /* 1. 左侧信息块 (50% 宽度，字体 14px) */
         .detail-title-block {
-            width: 35%; /* 占用左侧空间 */
-            font-size: 14px;
+            width: 50%; 
+            font-size: 14px; 
             font-weight: bold;
-            line-height: 1.1; /* 紧凑行高 */
+            line-height: 1.2; 
             letter-spacing: -0.2px;
             margin-bottom: 0;
-            white-space: nowrap;
         }
 
-        /* 2. 右侧正文块 (Text Block 2) */
+        /* 2. 右侧正文块 (50% 宽度，单栏，字体 14px) */
         .detail-main-text {
-            width: 65%; /* 占用右侧空间 */
-            font-size: 16px;
-            line-height: 1.3; /* 紧凑行高 */
-            column-count: 2; /* 双栏排版 */
-            column-gap: 20px;
+            width: 50%; 
+            font-size: 14px; 
+            line-height: 1.5; 
+            column-count: 1; /* 单栏显示 */
         }
 
         .detail-main-text p {
             margin-top: 0;
+            margin-bottom: 1.5em; 
         }
-
+        
         /* 底部图片区域 */
         .detail-image-stack {
+            width: 100%; 
             margin-top: 20px;
         }
 
         .detail-image-stack .image-block {
-            margin-bottom: 25px;
-            max-width: 100%;
-            display: block; /* 确保块级显示 */
+            margin-bottom: 35px; 
+            /* 关键修改：图片块限制为 50% 宽度 */
+            width: 50%; 
+            max-width: 50%;
+            display: block; 
+            /* 靠右对齐的 CSS 样式 */
+            margin-left: auto; 
+            margin-right: 0; 
         }
 
-        .detail-image-stack img {
+        /* --- 统一右侧详情页内的图片和视频样式 --- */
+        .detail-image-stack .image-block img,
+        .detail-image-stack .image-block video {
             width: 100%;
             height: auto;
             display: block;
         }
+        /* ------------------------------------------- */
         
         /* 模块内部图片的底部标题 */
         .image-caption {
@@ -230,6 +249,18 @@
             display: none !important;
         }
 
+        /* --- NEW: 页脚日期样式 --- */
+        .footer-date {
+            position: fixed; /* 固定在视口中 */
+            bottom: 20px;    /* 距离底部 20px */
+            left: 20px;      /* 距离左侧 20px */
+            font-size: 12px; 
+            font-weight: bold;
+            color: #111;
+            z-index: 5; /* 确保它在菜单之下，但不会被菜单遮挡 */
+        }
+        /* ------------------------- */
+
     </style>
 </head>
 <body>
@@ -239,24 +270,25 @@
         <ul class="menu-list">
             <li class="menu-item" onclick="openProject(0)">Work 01—My First Lamp</li>
             <li class="menu-item" onclick="openProject(1)">Work 02—Sarcasm</li>
-            <li class="menu-item" onclick="openProject(2)">Work 03—Delicta-Epsum<sup>TM</sup></li>
-            <li class="menu-item" onclick="openProject(3)">Work 04—Adamantes est The End</li>
-            <li class="menu-item" onclick="openProject(4)">Work 05—Sine Titulo</li>
+            <li class="menu-item" onclick="openProject(2)">Work 03—Shadows<sup>01</sup></li>
+            <li class="menu-item" onclick="openProject(3)">Work 04—Photography</li>
+            <li class="menu-item" onclick="openProject(4)">Work 05—Service Innovation Design</li>
             <li class="menu-item" onclick="openProject(5)">Work 06—Ategire et Claudere<sup>TM</sup></li>
             <li class="menu-item" onclick="openProject(6)">Work 07—Sine Titulo</li>
             <li class="menu-item" onclick="openProject(7)">Work 08—Façad: Saccharum</li>
             <li class="menu-item" onclick="openProject(8)">Work 09—Nos Sumus (spatium interius)</li>
             <li class="menu-item" onclick="openProject(9)">Work 10—Micare</li>
             <li class="menu-item" onclick="openProject(10)">Work 11—Omnia Ubique Simul</li>
+            <li class="menu-item" onclick="openProject(11)">Work 12—Video Demo (NEW)</li> 
+            <li class="menu-item" onclick="openProject(12)">Work 13—Detail Video Demo (NEW)</li> 
         </ul>
     </div>
 
     <div id="project-viewer">
         
         <div class="viewer-left">
-            <div class="media-wrapper">
-                <img id="viewer-img" src="images/main_image.jpg" alt="Project Image">
-            </div>
+            <div class="media-wrapper" id="media-content-container">
+                </div>
             
             <div class="meta-bar">
                 <div id="viewer-info">
@@ -277,57 +309,119 @@
             </div>
         </div>
     </div>
-
+    
+    <div class="footer-date">2025.12.3</div>
     <script>
         // *** 默认占位图，用于图片加载失败或没有定义路径的项目 ***
         const PLACEHOLDER_IMG = "https://picsum.photos/seed/default/800/500";
+        
+        // --- 元素获取 & 全局变量 ---
+        const viewer = document.getElementById('project-viewer');
+        const mediaContentContainer = document.getElementById('media-content-container'); // NEW CONTAINER
+        const viewerTitle = document.getElementById('viewer-title');
+        const viewerArtist = document.getElementById('viewer-artist');
+        const btnMore = document.getElementById('btn-more');
+        const detailContentArea = document.getElementById('detail-content-area');
 
-        // --- 模拟数据 (直接在数组中修改图片路径) ---
+        let carouselInterval = null;
+        let currentLoopImages = [];
+        let currentImgIndex = 0;
+        let currentMediaElement = null; // 用于追踪当前的媒体元素（img 或 video）
+
+        // --- 模拟数据 (请确保项目路径存在) ---
         const projects = [
             { 
                 title: "My First Lamp", 
                 artist: "24.7.21", 
-                // 主图路径 (请确保文件存在于 images 文件夹内)
                 img: "images/main_image.jpg", 
-                
-                // 轮播图列表 (左侧自动切换的图片，随意增减)
                 loopImages: [
                     "images/main_image.jpg",
                     "images/loop_image_2.jpg",
-                    // 随便增加的第三张轮播图
-                    // 随意添加/删除更多路径...
                 ],
-                
                 detailContent: {
-                    titleBlock: "Glo's first handcrafted lamp",
+                    titleBlock: "Glo's first handcrafted lamp.",
                     mainText: "The design draws inspiration from traditional Chinese elongated red lanterns, deconstructed structurally and primarily crafted from wood and herbaceous plants. Bamboo and rattan form the framework, overlaid with paper to diffuse a soft, hazy glow.",
-                    
-                    // 详情图片列表 (右侧详情页内的图片，随意增减)
                     images: [
                         { src: "images/detail_image_2.jpg", caption: "Three-view drawings" },
                         { src: "images/loop_image_3.jpg", caption: "Creative inspiration." },
                         { src: "images/IMG_7642(1).png", caption: "The flip side of elegance." },
-                        // 随意添加/删除更多 { src: 'path', caption: 'text' } 对象...
                     ]
                 }
             },
             { 
                 title: "I am like a moving tomb", 
-                artist: "24.11.7---", 
-                // 这是一个只有一张主图的项目
-                img: "images/我似一座流动的坟墓.jpg", 
+                artist: "24.11.7---",
+                img: "images/我似一座流动的坟墓.jpg",
+                loopImages: [
+                    "images/我似一座流动的坟墓.jpg",
+                    "images/7dce6a88a35b75f738e0deec2de877f.jpg",
+                ],
                 detailContent: {
                     titleBlock: "Sarcasm IS A BODY'S NATUAL DEFENSE AGAINST STUPIDITY", 
                     mainText: "The regression of civilisation will ultimately affect every single one of us. If I stand idly by today, might I not say tomorrow: ‘Had I dared to speak out, my circumstances might be different now?’", 
-                    images: [] // images 数组为空，表示右侧详情页没有图片
-                },
-                loopImages: ["images/work02_main.jpg"] // 轮播数组只有一张图，所以不会轮播
+                    images: [
+                        { src: "images/7766.jpg", caption: "小画1" },
+                        { src: "images/小画_01.png", caption: "小画2" }
+                    ] 
+                }
             },
-
-
-
-
-
+            { 
+                title: "Shadows in Motion", 
+                artist: "24.3.7---",
+                img: "images/图片444.png",
+                loopImages: [
+                    "images/图片555.png",
+                    "images/图片444.png",
+                    "images/图片.jpg",
+                ],
+                detailContent: {
+                    titleBlock: "Starting from the pineapple", 
+                    mainText: "Inspired by the pineapple, observing its various forms and shadows, creating small works.", 
+                    images: [
+                        { src: "images/空间构成作品_03.png", caption: "参考1" },
+                        { src: "images/空间构成作品_07.png", caption: "参考2" },
+                        { src: "images/3322.png", caption: "图纸" }
+                    ] 
+                }
+            },
+            { 
+                title: "Photography", 
+                artist: "24.9.30---",
+                img: "images/打翻-戎誉.jpg",
+                loopImages: [
+                    "images/打翻-戎誉.jpg",
+                    "images/激流-戎誉.jpg",
+                    "images/胶卷-戎誉.jpg",
+                ],
+                detailContent: {
+                    titleBlock: "Camera in hand", 
+                    mainText: "In my spare time, I like to go out for a stroll and capture moments with my camera.", 
+                    images: [
+                        { src: "images/戎誉3230101316 (7 - 14).jpg", caption: "1" },
+                        { src: "images/戎誉3230101316 (19 - 22).jpg", caption: "2" },
+                        { src: "images/打翻-戎誉.jpg", caption: "3" }
+                    ] 
+                }
+            },
+            
+            {
+                title: "Service Innovation Design",
+                artist: "25.1.1",
+                img: "images/实物模型.jpg", 
+                videoUrl: "videos/市集全貌展示视频.mp4", 
+                loopImages: [], 
+                detailContent: {
+                    titleBlock: "This project uses a video instead of a carousel.",
+                    mainText: "Service Innovation Design for the Game 'Nishuihan'",
+                    images: [
+                        { src: "images/展板.png", caption: "1" },
+                        { src: "images/05443e5ae51e39ada834f87970ef3b7.jpg", caption: "2" },
+                        // 包含详情页视频的演示数据
+                        { src: "images/3aaef7bf97a1ac0e18f4e82016b1044.jpg", videoSrc: "videos/小游戏AR演示视频.mp4", caption: "Detail Video 2" },
+                    ]
+                }
+            },
+            
             // ... 其它项目 (使用占位图作为演示)
             { title: "Delicta-Epsum", artist: "Artist C", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] },
             { title: "Adamantes est The End", artist: "Artist D", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] },
@@ -337,22 +431,46 @@
             { title: "Façad: Saccharum", artist: "Artist H", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] },
             { title: "Nos Sumus (spatium interius)", artist: "Artist I", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] },
             { title: "Micare", artist: "Artist J", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] },
-            { title: "Omnia Ubique Simul", artist: "Artist K", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] }
+            { title: "Omnia Ubique Simul", artist: "Artist K", img: PLACEHOLDER_IMG, detailContent: { titleBlock: "Title", mainText: "Default text.", images: [] }, loopImages: [PLACEHOLDER_IMG] },
+            
+            // --- Work 12: 左侧主视频演示 (保留) ---
+            {
+                title: "Video Demo Project",
+                artist: "25.1.1",
+                img: "images/video_poster.jpg", 
+                videoUrl: "videos/sample_video.mp4", 
+                loopImages: [], 
+                detailContent: {
+                    titleBlock: "This project uses a video instead of a carousel.",
+                    mainText: "The video below demonstrates the main media area functionality. The video should autoplay (muted) and loop.",
+                    images: []
+                }
+            },
+            
+            // --- Work 13: 右侧详情页视频演示 (保留) ---
+            {
+                title: "Detail Video Showcase",
+                artist: "25.1.2",
+                img: "images/detail_video_poster.jpg", 
+                loopImages: [PLACEHOLDER_IMG], 
+                detailContent: {
+                    titleBlock: "Detail Page Video Test.",
+                    mainText: "This project demonstrates the ability to include video clips directly within the right-hand detail content stack, alongside images.",
+                    images: [
+                        // 图片
+                        { src: "images/detail_image_2.jpg", caption: "Static Image 1" },
+                        // 视频 (注意: 使用 videoSrc 属性, src 用作视频封面)
+                        { src: "images/video_poster.jpg", videoSrc: "videos/sample_detail_video_1.mp4", caption: "Detail Video 1" }, 
+                        // 图片
+                        { src: "images/loop_image_3.jpg", caption: "Static Image 2" },
+                        // 视频
+                        { src: "images/video_poster2.jpg", videoSrc: "videos/sample_detail_video_2.mp4", caption: "Detail Video 2" },
+                    ]
+                }
+            }
         ];
 
-        // --- 元素获取 & 全局变量 ---
-        const viewer = document.getElementById('project-viewer');
-        const viewerImg = document.getElementById('viewer-img');
-        const viewerTitle = document.getElementById('viewer-title');
-        const viewerArtist = document.getElementById('viewer-artist');
-        const btnMore = document.getElementById('btn-more');
-        const detailContentArea = document.getElementById('detail-content-area');
-
-        let carouselInterval = null;
-        let currentLoopImages = [];
-        let currentImgIndex = 0;
-
-        // --- 辅助函数：渲染右侧详情内容 ---
+        // --- 辅助函数：渲染右侧详情内容 (支持视频) ---
         function renderDetails(content) {
             if (!content || !content.titleBlock) {
                 detailContentArea.innerHTML = '';
@@ -367,14 +485,32 @@
                 </div>
             `;
 
-            // 2. 底部图片堆叠 (在文本下方)
+            // 2. 底部图片堆叠 (支持图片和视频)
             let imagesHtml = '';
             if (content.images && content.images.length > 0) {
-                content.images.forEach(img => {
+                content.images.forEach(item => {
+                    let mediaTag;
+                    const caption = item.caption || '';
+                    
+                    if (item.videoSrc) {
+                        // 如果有 videoSrc 属性，渲染 <video> 标签
+                        mediaTag = `
+                            <video controls loop muted poster="${item.src || PLACEHOLDER_IMG}">
+                                <source src="${item.videoSrc}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        `;
+                    } else {
+                        // 否则渲染 <img> 标签 (使用 src)
+                        mediaTag = `
+                            <img src="${item.src}" alt="${caption}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}';">
+                        `;
+                    }
+                    
                     imagesHtml += `
                         <div class="image-block">
-                            <img src="${img.src}" alt="${img.caption || ''}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}';">
-                            <div class="image-caption">${img.caption}</div>
+                            ${mediaTag}
+                            <div class="image-caption">${caption}</div>
                         </div>
                     `;
                 });
@@ -384,7 +520,7 @@
             detailContentArea.innerHTML = textContentHtml + imageStackHtml;
         }
         
-        // --- 轮播控制 ---
+        // --- 轮播控制 (保持不变) ---
         function stopCarousel() {
             if (carouselInterval) {
                 clearInterval(carouselInterval);
@@ -394,27 +530,59 @@
         
         function startCarousel() {
             stopCarousel();
-            // 只有当图片数量大于 1 时才启动轮播
-            if (currentLoopImages.length > 1) {
+            if (currentLoopImages.length > 1 && currentMediaElement && currentMediaElement.tagName === 'IMG') {
                 carouselInterval = setInterval(() => {
                     currentImgIndex = (currentImgIndex + 1) % currentLoopImages.length;
-                    viewerImg.src = currentLoopImages[currentImgIndex];
-                    viewerImg.onerror = function() { this.onerror=null; this.src=PLACEHOLDER_IMG; }; // 错误处理
+                    currentMediaElement.src = currentLoopImages[currentImgIndex];
+                    currentMediaElement.onerror = function() { this.onerror=null; this.src=PLACEHOLDER_IMG; }; 
                 }, 2500);
             }
         }
 
-        // --- 交互控制 ---
+        // --- 交互控制 (保持不变) ---
 
         function openProject(index) {
             const data = projects[index % projects.length];
             
-            // 1. 轮播初始化和主图设置
-            currentLoopImages = data.loopImages && data.loopImages.length > 0 ? data.loopImages : [data.img];
-            currentImgIndex = 0;
-            viewerImg.src = data.img;
-            viewerImg.onerror = function() { this.onerror=null; this.src=PLACEHOLDER_IMG; };
-            startCarousel();
+            // 1. 清理并设置媒体内容
+            mediaContentContainer.innerHTML = '';
+            stopCarousel();
+            currentMediaElement = null;
+
+            if (data.videoUrl) {
+                // --- 视频处理 (左侧主区域) ---
+                const videoElement = document.createElement('video');
+                videoElement.setAttribute('controls', '');
+                videoElement.setAttribute('autoplay', '');
+                videoElement.setAttribute('loop', '');
+                videoElement.setAttribute('muted', '');
+                videoElement.setAttribute('poster', data.img || PLACEHOLDER_IMG);
+                videoElement.style.cssText = 'width: 100%; height: auto; display: block;';
+                
+                const sourceElement = document.createElement('source');
+                sourceElement.setAttribute('src', data.videoUrl);
+                sourceElement.setAttribute('type', 'video/mp4');
+                
+                videoElement.appendChild(sourceElement);
+                videoElement.appendChild(document.createTextNode('您的浏览器不支持视频标签。'));
+                mediaContentContainer.appendChild(videoElement);
+                
+                videoElement.play().catch(error => {});
+
+            } else {
+                // --- 图片/轮播图处理 (左侧主区域) ---
+                const imgElement = document.createElement('img');
+                imgElement.src = data.img || PLACEHOLDER_IMG;
+                imgElement.alt = "Project Image";
+                imgElement.onerror = function() { this.onerror=null; this.src=PLACEHOLDER_IMG; };
+                
+                mediaContentContainer.appendChild(imgElement);
+                currentMediaElement = imgElement;
+
+                currentLoopImages = data.loopImages && data.loopImages.length > 0 ? data.loopImages : [data.img];
+                currentImgIndex = 0;
+                startCarousel();
+            }
 
             // 2. 更新文字内容和详情页
             viewerTitle.innerText = data.title;
@@ -439,6 +607,17 @@
             }
             // 滚动到顶部，确保用户看到右侧详情
             document.querySelector('.viewer-right').scrollTo(0, 0); 
+            
+            // 当详情页展开时，尝试让其中的所有视频开始播放
+            if (viewer.classList.contains('expanded')) {
+                document.querySelectorAll('.detail-image-stack video').forEach(video => {
+                    // 确保静音，以便在详情页展开时浏览器允许播放
+                    video.muted = true;
+                    video.play().catch(e => {
+                        // console.log("Detail video autoplay blocked:", e);
+                    });
+                });
+            }
         }
 
         function closeProject() {

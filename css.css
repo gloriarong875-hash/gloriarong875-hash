@@ -1,0 +1,255 @@
+/* --- 基础设置 (Reset & Typography) --- */
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #fff;
+    color: #111;
+    overflow-x: hidden;
+}
+
+/* 隐藏滚动条但保留功能 */
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+/* --- 列表部分 (Main Menu) --- */
+#menu-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    padding: 20px;
+}
+
+.site-header {
+    font-size: 5vw;
+    line-height: 0.95;
+    letter-spacing: -1px;
+    margin-bottom: 0px;
+}
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item {
+    font-size: 5vw;
+    line-height: 0.92;
+    letter-spacing: -1.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.menu-item:hover {
+    opacity: 0.5;
+}
+
+sup {
+    font-size: 0.5em;
+    vertical-align: top;
+    position: relative;
+    top: 0.2em;
+}
+
+/* --- 详情展示层 (Viewer Overlay) --- */
+#project-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    display: flex;
+}
+
+#project-viewer.active {
+    pointer-events: auto;
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* --- 左侧内容 (图片/视频) --- */
+.viewer-left {
+    /* 默认状态：绝对定位在左上角 */
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: auto;
+    max-width: 50vw; 
+    padding: 20px;
+    transition: all 0.5s ease;
+}
+
+/* 展开状态 (More...)：左侧布局调整 - 实现垂直居中对齐 */
+#project-viewer.expanded .viewer-left {
+    position: static; /* 切换到流式布局，使 Flexbox 生效 */
+    width: 50%;
+    max-width: 50%;
+    height: 100%; /* 限制总长度不超过当前页面 */
+    overflow-y: hidden; 
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直居中 (居中向上对齐) */
+    align-items: center; /* 水平居中 */
+}
+
+.media-wrapper {
+    background: #fff;
+    width: 600px; /* 默认最大宽度 */
+    max-width: 100%;
+    height: auto;
+}
+
+/* --- 统一左侧图片和视频的样式 --- */
+.media-wrapper img,
+.media-wrapper video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+/* ---------------------------------- */
+
+.meta-bar {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    width: 100%;
+}
+
+.controls span {
+    cursor: pointer;
+    margin-left: 10px;
+    text-decoration: underline;
+}
+
+/* --- 右侧内容 (详细文本) --- */
+.viewer-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%; /* 占据右半边 */
+    height: 100%; /* 确保高度不超过当前页面 */
+    background: #fff;
+    padding: 30px; 
+    transform: translateX(100%);
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    overflow-y: auto; /* 文本内容溢出时内部滚动 */
+    border-left: 1px solid #eee;
+}
+
+/* 展开状态 (Mode Expanded) */
+#project-viewer.expanded .viewer-right {
+    transform: translateX(0);
+}
+
+/* 关闭按钮定位 */
+.close-button-right {
+    text-align: right;
+    font-size: 14px; 
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+/* --- 右侧详情页排版 (50%/50% 布局) --- */
+
+/* 顶部区域容器: 左右并排 (标题块 + 正文块) */
+.detail-top-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px; 
+    gap: 50px; 
+}
+
+/* 1. 左侧信息块 (50% 宽度，字体 14px) */
+.detail-title-block {
+    width: 50%; 
+    font-size: 14px; 
+    font-weight: bold;
+    line-height: 1.2; 
+    letter-spacing: -0.2px;
+    margin-bottom: 0;
+}
+
+/* 2. 右侧正文块 (50% 宽度，单栏，字体 14px) */
+.detail-main-text {
+    width: 50%; 
+    font-size: 14px; 
+    line-height: 1.5; 
+    column-count: 1; /* 单栏显示 */
+}
+
+.detail-main-text p {
+    margin-top: 0;
+    margin-bottom: 1.5em; 
+}
+
+/* 底部图片区域 */
+.detail-image-stack {
+    width: 100%; 
+    margin-top: 20px;
+}
+
+.detail-image-stack .image-block {
+    margin-bottom: 35px; 
+    /* 关键修改：图片块限制为 50% 宽度 */
+    width: 50%; 
+    max-width: 50%;
+    display: block; 
+    /* 靠右对齐的 CSS 样式 */
+    margin-left: auto; 
+    margin-right: 0; 
+}
+
+/* --- 统一右侧详情页内的图片和视频样式 --- */
+.detail-image-stack .image-block img,
+.detail-image-stack .image-block video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+/* ------------------------------------------- */
+
+/* 模块内部图片的底部标题 */
+.image-caption {
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* 隐藏类 */
+.hidden {
+    display: none !important;
+}
+
+/* --- NEW: 页脚日期样式 --- */
+.footer-date {
+    position: fixed; /* 固定在视口中 */
+    bottom: 20px;    /* 距离底部 20px */
+    left: 20px;      /* 距离左侧 20px */
+    font-size: 12px; 
+    font-weight: bold;
+    color: #111;
+    z-index: 5; /* 确保它在菜单之下，但不会被菜单遮挡 */
+}
+/* ------------------------- */

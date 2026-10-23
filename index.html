@@ -63,6 +63,50 @@
             opacity: 0.5;
         }
 
+        /* C.V. 入口：外观保持像原来的大标题文字，点击后显示简历图片 */
+        .cv-link {
+            display: inline;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            font: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .cv-link:hover {
+            opacity: 0.5;
+        }
+
+        /* Hover preview: shows the matching project cover beside the title. */
+        #title-hover-preview {
+            position: fixed;
+            width: clamp(180px, 18vw, 300px);
+            aspect-ratio: 4 / 3;
+            z-index: 60;
+            pointer-events: none;
+            opacity: 0;
+            transform: translate(18px, 18px) scale(0.96);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            background: #fff;
+        }
+
+        #title-hover-preview.active {
+            opacity: 0.72;
+            transform: translate(18px, 18px) scale(1);
+        }
+
+        #title-hover-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border: 1px solid #d8d8d8;
+            background: #fff;
+        }
+
         sup {
             font-size: 0.5em;
             vertical-align: top;
@@ -105,8 +149,8 @@
         /* 展开状态 (More...)：左侧布局调整 - 实现垂直居中对齐 */
         #project-viewer.expanded .viewer-left {
             position: static; /* 切换到流式布局，使 Flexbox 生效 */
-            width: 50%;
-            max-width: 50%;
+            width: 40%;
+            max-width: 40%;
             height: 100%; /* 限制总长度不超过当前页面 */
             overflow-y: hidden; 
             
@@ -129,6 +173,11 @@
             width: 100%;
             height: auto;
             display: block;
+        }
+
+        .media-wrapper img,
+        .detail-image-stack .image-block img {
+            cursor: zoom-in;
         }
         /* ---------------------------------- */
 
@@ -154,7 +203,7 @@
             position: absolute;
             top: 0;
             right: 0;
-            width: 50%; /* 占据右半边 */
+            width: 60%; /* 展开详情页右侧占 60% */
             height: 100%; /* 确保高度不超过当前页面 */
             background: #fff;
             padding: 30px; 
@@ -178,29 +227,27 @@
             margin-bottom: 20px;
         }
 
-        /* --- 右侧详情页排版 (50%/50% 布局) --- */
+        /* --- 右侧详情页排版：详情页整体只保留左右两列 --- */
         
         /* 顶部区域容器: 左右并排 (标题块 + 正文块) */
         .detail-top-section {
-            display: flex;
-            justify-content: space-between;
+            display: block;
             margin-bottom: 40px; 
-            gap: 50px; 
         }
 
-        /* 1. 左侧信息块 (50% 宽度，字体 14px) */
+        /* 1. 项目信息块 */
         .detail-title-block {
-            width: 50%; 
+            width: 100%; 
             font-size: 14px; 
             font-weight: bold;
             line-height: 1.2; 
             letter-spacing: -0.2px;
-            margin-bottom: 0;
+            margin-bottom: 18px;
         }
 
-        /* 2. 右侧正文块 (50% 宽度，单栏，字体 14px) */
+        /* 2. 项目正文块 */
         .detail-main-text {
-            width: 50%; 
+            width: 100%; 
             font-size: 14px; 
             line-height: 1.5; 
             column-count: 1; /* 单栏显示 */
@@ -219,12 +266,10 @@
 
         .detail-image-stack .image-block {
             margin-bottom: 35px; 
-            /* 关键修改：图片块限制为 50% 宽度 */
-            width: 50%; 
-            max-width: 50%;
+            width: 100%; 
+            max-width: 100%;
             display: block; 
-            /* 靠右对齐的 CSS 样式 */
-            margin-left: auto; 
+            margin-left: 0; 
             margin-right: 0; 
         }
 
@@ -242,6 +287,38 @@
             font-size: 12px;
             font-weight: bold;
             margin-top: 5px;
+        }
+
+        /* --- 图片点击放大层 --- */
+        #image-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            background: #fff;
+        }
+
+        #image-lightbox.active {
+            display: flex;
+        }
+
+        #image-lightbox img {
+            max-width: 96vw;
+            max-height: 90vh;
+            object-fit: contain;
+            cursor: zoom-out;
+        }
+
+        #image-lightbox .lightbox-close {
+            position: fixed;
+            top: 18px;
+            right: 22px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
         }
         
         /* 隐藏类 */
@@ -265,8 +342,9 @@
 </head>
 <body>
 
+    <!-- 首页左上角标题和作品目录：鼠标悬停标题会出现封面，点击标题会打开作品窗口 -->
     <div id="menu-container">
-        <div class="site-header">Gloria's Portfolio<br>C.V.</div>
+        <div class="site-header">Gloria's Portfolio<br><button class="cv-link" type="button" onclick="openCV()">C.V.</button></div>
         <ul class="menu-list">
             <li class="menu-item" onclick="openProject(0)">Work 01—My First Lamp</li>
             <li class="menu-item" onclick="openProject(1)">Work 02—Sarcasm</li>
@@ -284,8 +362,13 @@
         </ul>
     </div>
 
+    <!-- 首页 hover 封面预览：由 JS 根据鼠标所在作品标题换图 -->
+    <div id="title-hover-preview" aria-hidden="true"></div>
+
+    <!-- 作品详情窗口：初始显示左侧封面，点击 More 后展开为左 40% / 右 60% 两列 -->
     <div id="project-viewer">
         
+        <!-- 详情窗口左列：项目主图/视频和 More、Close 控制 -->
         <div class="viewer-left">
             <div class="media-wrapper" id="media-content-container">
                 </div>
@@ -302,6 +385,7 @@
             </div>
         </div>
 
+        <!-- 详情窗口右列：项目文字介绍和过程图片 -->
         <div class="viewer-right">
             <div class="close-button-right" onclick="closeProject()">(Close)</div>
             
@@ -309,26 +393,34 @@
             </div>
         </div>
     </div>
+
+    <!-- 图片放大查看层：点击详情页图片后显示，点空白 / Close / Esc 关闭 -->
+    <div id="image-lightbox" aria-hidden="true">
+        <button class="lightbox-close" type="button" onclick="closeImageLightbox()">(Close)</button>
+        <img id="lightbox-image" src="" alt="">
+    </div>
     
     <div class="footer-date">2025.12.3</div>
     <script>
         // *** 默认占位图，用于图片加载失败或没有定义路径的项目 ***
         const PLACEHOLDER_IMG = "https://picsum.photos/seed/default/800/500";
         
-        // --- 元素获取 & 全局变量 ---
+        // --- 控制用的页面元素：详情窗口、主图区域、文字区域、图片放大层 ---
         const viewer = document.getElementById('project-viewer');
         const mediaContentContainer = document.getElementById('media-content-container'); // NEW CONTAINER
         const viewerTitle = document.getElementById('viewer-title');
         const viewerArtist = document.getElementById('viewer-artist');
         const btnMore = document.getElementById('btn-more');
         const detailContentArea = document.getElementById('detail-content-area');
+        const imageLightbox = document.getElementById('image-lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
 
         let carouselInterval = null;
         let currentLoopImages = [];
         let currentImgIndex = 0;
         let currentMediaElement = null; // 用于追踪当前的媒体元素（img 或 video）
 
-        // --- 模拟数据 (请确保项目路径存在) ---
+        // --- 作品数据：这里改每个作品的标题、封面、轮播图、详情文字和详情图片 ---
         const projects = [
             { 
                 title: "My First Lamp", 
@@ -354,7 +446,6 @@
                 img: "images/我似一座流动的坟墓.jpg",
                 loopImages: [
                     "images/我似一座流动的坟墓.jpg",
-                    "images/7dce6a88a35b75f738e0deec2de877f.jpg",
                 ],
                 detailContent: {
                     titleBlock: "Sarcasm IS A BODY'S NATUAL DEFENSE AGAINST STUPIDITY", 
@@ -397,9 +488,11 @@
                     titleBlock: "Camera in hand", 
                     mainText: "In my spare time, I like to go out for a stroll and capture moments with my camera.", 
                     images: [
-                        { src: "images/戎誉3230101316 (7 - 14).jpg", caption: "1" },
-                        { src: "images/戎誉3230101316 (19 - 22).jpg", caption: "2" },
-                        { src: "images/打翻-戎誉.jpg", caption: "3" }
+                        { src: "images/胶卷-戎誉.jpg", caption: "1" },
+                        { src: "images/激流-戎誉.jpg", caption: "2" },
+                        { src: "images/打翻-戎誉.jpg", caption: "3" },
+                        { src: "images/戎誉3230101316 (7 - 14).jpg", caption: "4" },
+                        { src: "images/戎誉3230101316 (19 - 22).jpg", caption: "5" }
                     ] 
                 }
             },
@@ -469,6 +562,112 @@
                 }
             }
         ];
+
+        // --- 首页标题悬停预览：不改变原有点击打开项目逻辑，只额外显示对应封面 ---
+        const titleHoverPreview = document.getElementById('title-hover-preview');
+
+        // 控制 hover 小封面跟随鼠标，并避免超出浏览器边缘。
+        function moveTitleHoverPreview(event) {
+            if (!titleHoverPreview || !titleHoverPreview.classList.contains('active')) return;
+
+            const gap = 18;
+            const previewWidth = titleHoverPreview.offsetWidth || 260;
+            const previewHeight = titleHoverPreview.offsetHeight || 195;
+            const anchor = event.currentTarget && event.currentTarget.getBoundingClientRect
+                ? event.currentTarget.getBoundingClientRect()
+                : { left: gap, top: gap };
+            const pointerX = typeof event.clientX === 'number' ? event.clientX : anchor.left;
+            const pointerY = typeof event.clientY === 'number' ? event.clientY : anchor.top;
+            let left = pointerX + gap;
+            let top = pointerY + gap;
+
+            if (left + previewWidth + gap > window.innerWidth) {
+                left = pointerX - previewWidth - gap;
+            }
+
+            if (top + previewHeight + gap > window.innerHeight) {
+                top = pointerY - previewHeight - gap;
+            }
+
+            titleHoverPreview.style.left = `${Math.max(gap, left)}px`;
+            titleHoverPreview.style.top = `${Math.max(gap, top)}px`;
+        }
+
+        // 根据作品序号，把 hover 小封面换成对应项目的 img。
+        function showTitleHoverPreview(index, event) {
+            if (!titleHoverPreview) return;
+
+            const project = projects[index % projects.length];
+            if (!project) return;
+
+            titleHoverPreview.innerHTML = `
+                <img src="${project.img || PLACEHOLDER_IMG}" alt="${project.title}" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMG}';">
+            `;
+            titleHoverPreview.classList.add('active');
+            moveTitleHoverPreview(event);
+        }
+
+        // 鼠标离开标题时隐藏 hover 小封面。
+        function hideTitleHoverPreview() {
+            if (!titleHoverPreview) return;
+            titleHoverPreview.classList.remove('active');
+        }
+
+        // 给首页每一条作品标题绑定 hover / mousemove / leave 事件。
+        function initTitleHoverPreview() {
+            document.querySelectorAll('.menu-item').forEach((item, index) => {
+                item.addEventListener('mouseenter', (event) => showTitleHoverPreview(index, event));
+                item.addEventListener('mousemove', moveTitleHoverPreview);
+                item.addEventListener('mouseleave', hideTitleHoverPreview);
+                item.addEventListener('focus', (event) => showTitleHoverPreview(index, event));
+                item.addEventListener('blur', hideTitleHoverPreview);
+            });
+        }
+
+        // 打开图片放大层：详情页里的主图和过程图都会用到。
+        function openImageLightbox(src, alt) {
+            if (!imageLightbox || !lightboxImage || !src) return;
+            lightboxImage.src = src;
+            lightboxImage.alt = alt || "Project image";
+            imageLightbox.classList.add('active');
+            imageLightbox.setAttribute('aria-hidden', 'false');
+        }
+
+        // C.V. 点击入口：打开 images 文件夹里的简历图片。
+        function openCV() {
+            hideTitleHoverPreview();
+            openImageLightbox("images/戎誉简历2026_01.png", "戎誉简历 2026");
+        }
+
+        // 关闭图片放大层：Close、空白区域、Esc 都会调用这里。
+        function closeImageLightbox() {
+            if (!imageLightbox || !lightboxImage) return;
+            imageLightbox.classList.remove('active');
+            imageLightbox.setAttribute('aria-hidden', 'true');
+            lightboxImage.src = "";
+        }
+
+        // 监听详情页图片点击，点击后显示大图。
+        document.addEventListener('click', (event) => {
+            if (!(event.target instanceof Element)) return;
+            const image = event.target.closest('.media-wrapper img, .detail-image-stack img');
+            if (!image) return;
+            openImageLightbox(image.currentSrc || image.src, image.alt);
+        });
+
+        // 点击白色放大层的空白处关闭大图。
+        imageLightbox.addEventListener('click', (event) => {
+            if (event.target === imageLightbox) {
+                closeImageLightbox();
+            }
+        });
+
+        // 按 Esc 关闭大图。
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeImageLightbox();
+            }
+        });
 
         // --- 辅助函数：渲染右侧详情内容 (支持视频) ---
         function renderDetails(content) {
@@ -542,6 +741,7 @@
         // --- 交互控制 (保持不变) ---
 
         function openProject(index) {
+            hideTitleHoverPreview();
             const data = projects[index % projects.length];
             
             // 1. 清理并设置媒体内容
@@ -628,6 +828,8 @@
                 btnMore.innerText = "(More...)";
             }, 400);
         }
+
+        initTitleHoverPreview();
         
     </script>
 </body>
